@@ -11,8 +11,8 @@ keywords = [
     "bioinformatics",
     "genomics",
     "phylogenetics",
-    "visualization,
-    "clustermap"
+    "visualization",
+    "clustermap",
 ]
 classifiers = [
     "Intended Audience :: Science/Research",

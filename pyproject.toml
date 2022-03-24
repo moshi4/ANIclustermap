@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "aniclustermap"
+version = "0.1.0"
+description = "Draw ANI(Average Nucleotide Identity) clustermap"
+authors = ["moshi"]
+license = "MIT"
+homepage = "https://github.com/moshi4/ANIclustermap/"
+repository = "https://github.com/moshi4/ANIclustermap/"
+readme = "README.md"
+keywords = [
+    "bioinformatics",
+    "genomics",
+    "phylogenetics",
+    "visualization,
+    "clustermap"
+]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pandas = "^1.4.1"
+seaborn = "^0.11.2"
+
+[tool.poetry.dev-dependencies]
+black = "^22.1.0"
+flake8 = "^4.0.1"
+pydocstyle = "^6.1.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

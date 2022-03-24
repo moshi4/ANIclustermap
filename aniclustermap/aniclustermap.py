@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import argparse
 import os
+import platform
+import subprocess as sp
 from pathlib import Path
 
 __version__ = "0.1.0"
@@ -22,7 +24,16 @@ def main():
 
 def run(indir: Path, outdir: Path, thread_num: int = 1) -> None:
     """Run ANIclustermap workflow"""
-    pass
+    add_bin_path()
+
+
+def add_bin_path() -> None:
+    """Add executable binary (fastANI) path to PATH"""
+    os_name = platform.system()  # 'Windows' or 'Darwin' or 'Linux'
+    bin_path = Path(__file__).parent / "bin" / os_name
+    sep = ";" if os_name == "Windows" else ":"
+    env_path = f"{bin_path}{sep}{os.environ['PATH']}"
+    os.environ["PATH"] = env_path
 
 
 def get_args() -> argparse.Namespace:

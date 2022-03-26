@@ -28,6 +28,8 @@ seaborn = "^0.11.2"
 black = "^22.1.0"
 flake8 = "^4.0.1"
 pydocstyle = "^6.1.1"
+pytest = "^7.1.1"
+pytest-cov = "^3.0.0"
 
 [tool.poetry.scripts]
 ANIclustermap = "aniclustermap.aniclustermap:main"

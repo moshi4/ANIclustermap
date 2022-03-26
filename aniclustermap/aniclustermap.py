@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import itertools
 import os
 import platform
 import subprocess as sp
@@ -29,9 +30,21 @@ def main():
     width: int = args.fig_width
     height: int = args.fig_height
     dendrogram_ratio: float = args.dendrogram_ratio
+    cmap_colors: List[str] = args.cmap_colors.split(",")
+    cmap_gamma: float = args.cmap_gamma
     annotation: bool = args.annotation
 
-    run(indir, outdir, thread_num, width, height, dendrogram_ratio, annotation)
+    run(
+        indir,
+        outdir,
+        thread_num,
+        width,
+        height,
+        dendrogram_ratio,
+        cmap_colors,
+        cmap_gamma,
+        annotation,
+    )
 
 
 def run(
@@ -41,11 +54,15 @@ def run(
     fig_width: int = 10,
     fig_height: int = 10,
     dendrogram_ratio: float = 0.15,
+    cmap_colors: List[str] = ["lime", "yellow", "red"],
+    cmap_gamma: float = 1.0,
     annotation: bool = False,
 ) -> None:
     """Run ANIclustermap workflow"""
+    outdir.mkdir(exist_ok=True)
+
     # Run fastANI
-    genome_fasta_list_file = outdir / "genome_seq_list.txt"
+    genome_fasta_list_file = outdir / "genome_fasta_list.txt"
     write_genome_fasta_list(indir, genome_fasta_list_file)
 
     fastani_result_file = outdir / "fastani_result"
@@ -58,6 +75,8 @@ def run(
     fastani_matrix_tsv_file = outdir / "fastani_matrix.tsv"
     fastani_df = parse_fastani_matrix(fastani_matrix_file)
     fastani_df.to_csv(fastani_matrix_tsv_file, sep="\t", index=False)
+    all_values = itertools.chain.from_iterable(fastani_df.values.tolist())
+    min_ani = min(filter(lambda v: v != 0, all_values))
 
     # Hierarchical clustering ANI matrix
     linkage = hc.linkage(fastani_df, method="ward")
@@ -72,23 +91,32 @@ def run(
         raise ValueError("Invalid hierarchy cluster detected!!")
 
     # Draw ANI clustermap
-    colors = ["lime", "yellow", "red"]
-    gamma = 1.0
-    mycmap = LinearSegmentedColormap.from_list("mycmap", colors=colors, gamma=gamma)
-    g = sns.clustermap(
+    mycmap = LinearSegmentedColormap.from_list(
+        "mycmap", colors=cmap_colors, gamma=cmap_gamma
+    )
+    mycmap.set_under("lightgrey")
+    sns.clustermap(
         data=fastani_df,
         col_linkage=linkage,
         row_linkage=linkage,
         figsize=(fig_width, fig_height),
         annot=annotation,
-        fmt=".2f",
+        fmt=".4g",
         cmap=mycmap,
         dendrogram_ratio=dendrogram_ratio,
         xticklabels=False,
         yticklabels=True,
+        vmin=min_ani,
+        vmax=100,
         cbar=True,
+        cbar_kws={
+            "label": "ANI (%)",
+            "orientation": "vertical",
+            # "extend": "min",
+            # "extendfrac": 0.1,
+        },
+        tree_kws={"linewidths": 1.5},
     )
-
     fastani_clustermap_file = outdir / "ANIclustermap.png"
     plt.savefig(fastani_clustermap_file)
     plt.savefig(fastani_clustermap_file.with_suffix(".svg"))
@@ -97,7 +125,7 @@ def run(
 def write_genome_fasta_list(
     target_dir: Path,
     list_outfile: Path,
-    exts: List[str] = ["fa", "fna", "fasta"],
+    exts: List[str] = ["fa", "fna", ".fna.gz", "fasta"],
 ) -> None:
     """Write genome fasta file list for fastANI run
 
@@ -163,7 +191,7 @@ def parse_fastani_matrix(matrix_file: Path) -> pd.DataFrame:
         genome_num = int(next(reader)[0].rstrip("\n"))
         for row in reader:
             names.append(Path(row[0]).with_suffix("").name)
-            ani_values = [float(d) for d in row[1:]]
+            ani_values = list(map(lambda d: 0.0 if d == "NA" else float(d), row[1:]))
             ani_values.extend([0] * (genome_num - len(ani_values)))
             ani_values_list.append(ani_values)
 
@@ -217,7 +245,7 @@ def get_args() -> argparse.Namespace:
         "--indir",
         required=True,
         type=Path,
-        help="Input genome sequences directory (*.fa|*.fna|*.fasta)",
+        help="Input genome fasta directory (*.fa|*.fna[.gz]|*.fasta)",
         metavar="I",
     )
     parser.add_argument(
@@ -260,6 +288,22 @@ def get_args() -> argparse.Namespace:
         type=float,
         help=f"Dendrogram ratio (Default: {default_dendrogram_ratio})",
         default=default_dendrogram_ratio,
+        metavar="",
+    )
+    default_cmap_colors = "lime,yellow,red"
+    parser.add_argument(
+        "--cmap_colors",
+        type=str,
+        help=f"cmap interpolation colors parameter (Default: '{default_cmap_colors}')",
+        default=default_cmap_colors,
+        metavar="",
+    )
+    default_cmap_gamma = 1.0
+    parser.add_argument(
+        "--cmap_gamma",
+        type=float,
+        help=f"cmap gamma parameter (Default: {default_cmap_gamma})",
+        default=default_cmap_gamma,
         metavar="",
     )
     parser.add_argument(

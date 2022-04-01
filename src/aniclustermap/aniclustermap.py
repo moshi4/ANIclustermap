@@ -61,19 +61,21 @@ def run(
 ) -> None:
     """Run ANIclustermap workflow"""
     outdir.mkdir(exist_ok=True)
+    workdir = outdir / "work"
+    workdir.mkdir(exist_ok=True)
 
     # Run fastANI
-    genome_fasta_list_file = outdir / "genome_fasta_list.txt"
+    genome_fasta_list_file = workdir / "genome_fasta_file_list.txt"
     write_genome_fasta_list(indir, genome_fasta_list_file)
 
-    fastani_result_file = outdir / "fastani_result"
+    fastani_result_file = workdir / "fastani_result"
     fastani_matrix_file = Path(str(fastani_result_file) + ".matrix")
     if not fastani_matrix_file.exists():
         add_bin_path()
         run_fastani(genome_fasta_list_file, fastani_result_file, thread_num)
 
     # Parse ANI matrix as dataframe
-    fastani_matrix_tsv_file = outdir / "fastani_matrix.tsv"
+    fastani_matrix_tsv_file = workdir / "fastani_matrix.tsv"
     fastani_df = parse_fastani_matrix(fastani_matrix_file)
     fastani_df.to_csv(fastani_matrix_tsv_file, sep="\t", index=False)
     all_values = itertools.chain.from_iterable(fastani_df.values.tolist())

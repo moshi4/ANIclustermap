@@ -16,6 +16,7 @@ import scipy.cluster.hierarchy as hc
 import seaborn as sns
 from matplotlib.colors import LinearSegmentedColormap, is_color_like
 from scipy.cluster.hierarchy import ClusterNode
+from seaborn.matrix import ClusterGrid
 
 __version__ = "0.1.0"
 
@@ -95,7 +96,7 @@ def run(
         "mycmap", colors=cmap_colors, gamma=cmap_gamma
     )
     mycmap.set_under("lightgrey")
-    sns.clustermap(
+    g: ClusterGrid = sns.clustermap(
         data=fastani_df,
         col_linkage=linkage,
         row_linkage=linkage,
@@ -117,6 +118,14 @@ def run(
         },
         tree_kws={"linewidths": 1.5},
     )
+    # Get clusterd fastani matrix dataframe
+    clustered_fastani_df = get_clustered_matrix(fastani_df, g)
+    clustered_fastani_matrix_tsv_file = outdir / "ANIclustermap_matrix.tsv"
+    clustered_fastani_df.to_csv(
+        clustered_fastani_matrix_tsv_file, sep="\t", index=False
+    )
+
+    # Output ANI clustermap figure
     fastani_clustermap_file = outdir / "ANIclustermap.png"
     plt.savefig(fastani_clustermap_file)
     plt.savefig(fastani_clustermap_file.with_suffix(".svg"))
@@ -229,6 +238,21 @@ def dendrogram2newick(
         newick = dendrogram2newick(node.right, node.dist, leaf_names, f",{newick}")
         newick = f"({newick}"
         return newick
+
+
+def get_clustered_matrix(original_df: pd.DataFrame, g: ClusterGrid) -> pd.DataFrame:
+    """Get clustered ANI matrix
+
+    Args:
+        original_df (pd.DataFrame): Original dataframe before clusterring
+        g (ClusterGrid): Cluster grid ('clustermap' return value)
+
+    Returns:
+        pd.DataFrame: Clustered matrix dataframe
+    """
+    clustered_row_index = original_df.index[g.dendrogram_row.reordered_ind]
+    clustered_col_index = original_df.columns[g.dendrogram_col.reordered_ind]
+    return original_df.loc[clustered_row_index, clustered_col_index]
 
 
 def get_args() -> argparse.Namespace:

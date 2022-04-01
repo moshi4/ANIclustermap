@@ -201,7 +201,7 @@ def parse_fastani_matrix(matrix_file: Path) -> pd.DataFrame:
         reader = csv.reader(f, delimiter="\t")
         genome_num = int(next(reader)[0].rstrip("\n"))
         for row in reader:
-            names.append(Path(row[0]).with_suffix("").name)
+            names.append(Path(row[0]).with_suffix("").name.rstrip(".fna"))
             ani_values = list(map(lambda d: 0.0 if d == "NA" else float(d), row[1:]))
             ani_values.extend([0] * (genome_num - len(ani_values)))
             ani_values_list.append(ani_values)

@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import scipy.cluster.hierarchy as hc
 import seaborn as sns
-from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.colors import LinearSegmentedColormap, is_color_like
 from scipy.cluster.hierarchy import ClusterNode
 
 __version__ = "0.1.0"
@@ -318,7 +318,15 @@ def get_args() -> argparse.Namespace:
         version=f"v{__version__}",
         help="Print version information",
     )
-    return parser.parse_args()
+
+    args = parser.parse_args()
+
+    # Validate cmap color string
+    for cmap_color in args.cmap_colors.split(","):
+        if not is_color_like(cmap_color):
+            parser.error(f"'{cmap_color}' is not valid color like string!!")
+
+    return args
 
 
 if __name__ == "__main__":

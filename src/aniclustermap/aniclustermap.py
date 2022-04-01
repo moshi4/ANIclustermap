@@ -278,7 +278,7 @@ def get_args() -> argparse.Namespace:
         "-t",
         "--thread_num",
         type=int,
-        help=f"fastANI thread numter parameter (Default: {default_thread_num})",
+        help=f"fastANI thread number parameter (Default: {default_thread_num})",
         default=default_thread_num,
         metavar="",
     )
@@ -302,7 +302,7 @@ def get_args() -> argparse.Namespace:
     parser.add_argument(
         "--dendrogram_ratio",
         type=float,
-        help=f"Dendrogram ratio (Default: {default_dendrogram_ratio})",
+        help=f"Dendrogram ratio to figsize (Default: {default_dendrogram_ratio})",
         default=default_dendrogram_ratio,
         metavar="",
     )

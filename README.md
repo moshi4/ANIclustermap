@@ -43,7 +43,7 @@ Description of ANIclustermap's automated workflow.
     -h, --help           show this help message and exit
     -i I, --indir I      Input genome fasta directory (*.fa|*.fna[.gz]|*.fasta)
     -o O, --outdir O     Output directory
-    -t , --thread_num    fastANI thread number parameter (Default: 11)
+    -t , --thread_num    fastANI thread number parameter (Default: MaxThread - 1)
     --fig_width          Figure width (Default: 10)
     --fig_height         Figure height (Default: 10)
     --dendrogram_ratio   Dendrogram ratio to figsize (Default: 0.15)

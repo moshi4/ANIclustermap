@@ -54,7 +54,7 @@ Description of ANIclustermap's automated workflow.
 
 ### Example Command
 
-    ANIclustermap -i ./example/minimal_dataset/ -o ./aniclustermap_result
+    ANIclustermap -i ./example/input/minimal_dataset/ -o ./aniclustermap_result
 
 ## Output Contents
 
@@ -62,9 +62,10 @@ ANIclustermap outputs 3 types of files.
 
 - **`ANIclustermap.[png|svg]`**  
   ANI clustermap result figure.
+  ![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/minimal_dataset/ANIclustermap.png)  
 
-- **`ANIclustermap_matrix.tsv`**  
+- **`ANIclustermap_matrix.tsv`** ([example](https://github.com/moshi4/ANIclustermap/blob/main/example/output/minimal_dataset/ANIclustermap_matrix.tsv))  
   Clustered all-vs-all ANI matrix.
 
-- **`ANIclustermap_dendrogram.nwk`**  
+- **`ANIclustermap_dendrogram.nwk`** ([example](https://github.com/moshi4/ANIclustermap/blob/main/example/output/minimal_dataset/ANIclustermap_dendrogram.nwk))  
   Newick format clustering dendrogram.

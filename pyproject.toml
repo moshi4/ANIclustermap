@@ -18,6 +18,7 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
+include = ["tests"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"

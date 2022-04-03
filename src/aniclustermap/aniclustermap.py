@@ -71,6 +71,7 @@ def run(
     fastani_result_file = workdir / "fastani_result"
     fastani_matrix_file = Path(str(fastani_result_file) + ".matrix")
     if not fastani_matrix_file.exists():
+        add_bin_path()
         run_fastani(genome_fasta_list_file, fastani_result_file, thread_num)
 
     # Parse ANI matrix as dataframe
@@ -174,6 +175,15 @@ def run_fastani(
     sp.run(cmd, shell=True)
     if fastani_result_file.exists():
         fastani_result_file.unlink()
+
+
+def add_bin_path() -> None:
+    """Add executable binary (fastANI) path to PATH"""
+    os_name = platform.system()  # 'Windows' or 'Darwin' or 'Linux'
+    bin_path = Path(__file__).parent / "bin" / os_name
+    sep = ";" if os_name == "Windows" else ":"
+    env_path = f"{bin_path}{sep}{os.environ['PATH']}"
+    os.environ["PATH"] = env_path
 
 
 def parse_fastani_matrix(matrix_file: Path) -> pd.DataFrame:

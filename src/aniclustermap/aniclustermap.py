@@ -82,7 +82,7 @@ def run(
     min_ani = min(filter(lambda v: v != 0, all_values))
 
     # Hierarchical clustering ANI matrix
-    linkage = hc.linkage(fastani_df, method="ward")
+    linkage = hc.linkage(fastani_df, method="average")
 
     # Output dendrogram tree as newick format tree
     tree = hc.to_tree(linkage)

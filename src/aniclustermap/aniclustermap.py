@@ -182,7 +182,7 @@ def add_bin_path() -> None:
     os_name = platform.system()  # 'Windows' or 'Darwin' or 'Linux'
     bin_path = Path(__file__).parent / "bin" / os_name
     sep = ";" if os_name == "Windows" else ":"
-    env_path = f"{bin_path}{sep}{os.environ['PATH']}"
+    env_path = f"{os.environ['PATH']}{sep}{bin_path}"
     os.environ["PATH"] = env_path
 
 

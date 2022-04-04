@@ -1,4 +1,4 @@
-# ANIclustermap: Draw Clustermap of All-vs-All ANI
+# ANIclustermap
 
 ![Python3](https://img.shields.io/badge/Language-Python3-steelblue)
 ![OS](https://img.shields.io/badge/OS-Mac_|_Linux-steelblue)
@@ -7,9 +7,12 @@
 
 ## Overview
 
-ANIclustermap is easy-to-use tool for drawing ANI clustermap between all-vs-all microbial genomes.
+ANIclustermap is easy-to-use tool for drawing ANI(Average Nucleotide Identity) clustermap between all-vs-all microbial genomes.
 
-![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/minimal_dataset/ANIclustermap_annotation.png)  
+![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/small_dataset/ANIclustermap_annotation.png)  
+Fig1. ANIclustermap between all-vs-all 18 genomes. Areas where no similarity was found by fastANI are filled in gray.
+![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/normal_dataset/ANIclustermap.png)  
+Fig2. ANIclustermap between all-vs-all 33 genomes.
 
 ## Installation
 
@@ -30,7 +33,7 @@ Description of ANIclustermap's automated workflow.
 1. Calculate ANI between all-vs-all microbial genomes by fastANI.  
    If similarity between genomes is low, fastANI output NA. In that case, NA is replaced by 0.0.
 2. Clustering ANI matrix by scipy's UPGMA method.  
-3. Using clustered matrix, drawing clustermap by seaborn.  
+3. Using clustered matrix, draw ANI clustermap by seaborn.  
 
 ## Usage
 
@@ -60,12 +63,13 @@ Description of ANIclustermap's automated workflow.
 
 ANIclustermap outputs 3 types of files.
 
-- **`ANIclustermap.[png|svg]`**  
+- **`ANIclustermap.[png|svg]`**  ([example1](https://github.com/moshi4/ANIclustermap/blob/main/example/output/05_normal_dataset/ANIclustermap.png), [example2](https://github.com/moshi4/ANIclustermap/blob/main/example/output/06_normal_dataset_annotation/ANIclustermap.png))  
   ANI clustermap result figure.
-  ![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/minimal_dataset/ANIclustermap.png)  
 
-- **`ANIclustermap_matrix.tsv`** ([example](https://github.com/moshi4/ANIclustermap/blob/main/example/output/minimal_dataset/ANIclustermap_matrix.tsv))  
+- **`ANIclustermap_matrix.tsv`** ([example](https://github.com/moshi4/ANIclustermap/blob/main/example/output/05_normal_dataset/ANIclustermap_matrix.tsv))  
   Clustered all-vs-all ANI matrix.
 
-- **`ANIclustermap_dendrogram.nwk`** ([example](https://github.com/moshi4/ANIclustermap/blob/main/example/output/minimal_dataset/ANIclustermap_dendrogram.nwk))  
+- **`ANIclustermap_dendrogram.nwk`** ([example](https://github.com/moshi4/ANIclustermap/blob/main/example/output/05_normal_dataset/ANIclustermap_dendrogram.nwk))  
   Newick format clustering dendrogram.
+
+## Gallery

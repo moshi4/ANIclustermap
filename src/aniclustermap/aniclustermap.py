@@ -104,7 +104,7 @@ def run(
         row_linkage=linkage,
         figsize=(fig_width, fig_height),
         annot=annotation,
-        fmt=".4g",
+        fmt=".3g",
         cmap=mycmap,
         dendrogram_ratio=dendrogram_ratio,
         xticklabels=False,

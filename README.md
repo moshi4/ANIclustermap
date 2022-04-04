@@ -4,13 +4,15 @@
 ![OS](https://img.shields.io/badge/OS-Mac_|_Linux-steelblue)
 ![License](https://img.shields.io/badge/License-MIT-steelblue)
 [![Latest PyPI version](https://img.shields.io/pypi/v/aniclustermap.svg)](https://pypi.python.org/pypi/aniclustermap)
+[![Bioconda](https://img.shields.io/conda/vn/bioconda/aniclustermap.svg?color=green)](https://anaconda.org/bioconda/aniclustermap)  
 
 ## Overview
 
 ANIclustermap is easy-to-use tool for drawing ANI(Average Nucleotide Identity) clustermap between all-vs-all microbial genomes.
 
 ![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/small_dataset/ANIclustermap_annotation.png)  
-Fig1. ANIclustermap between all-vs-all 18 genomes. Areas where no similarity was found by fastANI are filled in gray.
+Fig1. ANIclustermap between all-vs-all 18 genomes. If no similarity detected by fastANI, filled in gray.
+
 ![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/normal_dataset/ANIclustermap.png)  
 Fig2. ANIclustermap between all-vs-all 33 genomes.
 
@@ -31,7 +33,8 @@ Install latest development version with pip:
 Description of ANIclustermap's automated workflow.
 
 1. Calculate ANI between all-vs-all microbial genomes by fastANI.  
-   If similarity between genomes is low, fastANI output NA. In that case, NA is replaced by 0.0.
+   If no similarity detected by fastANI, NA is output. In that case, NA is replaced by 0.0.  
+   If previous result available at the time of re-run, reuse previous result.
 2. Clustering ANI matrix by scipy's UPGMA method.  
 3. Using clustered matrix, draw ANI clustermap by seaborn.  
 
@@ -57,7 +60,7 @@ Description of ANIclustermap's automated workflow.
 
 ### Example Command
 
-    ANIclustermap -i ./example/input/minimal_dataset/ -o ./aniclustermap_result
+    ANIclustermap -i ./example/input/small_dataset/ -o ./aniclustermap_result --fig_width 15
 
 ## Output Contents
 

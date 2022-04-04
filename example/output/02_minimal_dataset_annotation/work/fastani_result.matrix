@@ -1,0 +1,8 @@
+7
+input/minimal_dataset/GCA_001771535.1_ASM177153v1_genomic.fna.gz
+input/minimal_dataset/GCA_001771505.1_ASM177150v1_genomic.fna.gz	80.793716
+input/minimal_dataset/GCA_001771395.1_ASM177139v1_genomic.fna.gz	80.753059	99.901184
+input/minimal_dataset/GCA_001771705.1_ASM177170v1_genomic.fna.gz	81.458725	99.308441	99.358475
+input/minimal_dataset/GCA_001771455.1_ASM177145v1_genomic.fna.gz	99.684875	79.955521	79.616364	80.323517
+input/minimal_dataset/GCA_001772385.1_ASM177238v1_genomic.fna.gz	80.884293	99.991837	99.921089	99.352036	79.971725
+input/minimal_dataset/GCA_001771655.1_ASM177165v1_genomic.fna.gz	99.823105	80.891441	80.787682	81.110901	99.631607	80.970734

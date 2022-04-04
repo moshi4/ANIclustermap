@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aniclustermap"
-version = "0.1.0"
+version = "1.0.0"
 description = "A tool for drawing ANI clustermap between all-vs-all microbial genomes"
 authors = ["moshi"]
 license = "MIT"

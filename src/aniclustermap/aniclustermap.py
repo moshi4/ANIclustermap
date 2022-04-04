@@ -18,7 +18,7 @@ from matplotlib.colors import LinearSegmentedColormap, is_color_like
 from scipy.cluster.hierarchy import ClusterNode
 from seaborn.matrix import ClusterGrid
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 
 def main():

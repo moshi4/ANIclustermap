@@ -66,13 +66,19 @@ def run(
 
     # Run fastANI
     genome_fasta_list_file = workdir / "genome_fasta_file_list.txt"
-    write_genome_fasta_list(indir, genome_fasta_list_file)
+    genome_num = write_genome_fasta_list(indir, genome_fasta_list_file)
+    if genome_num <= 1:
+        print("ERROR: Number of input genome fasta file is less than 1.")
+        exit(1)
 
     fastani_result_file = workdir / "fastani_result"
     fastani_matrix_file = Path(str(fastani_result_file) + ".matrix")
     if not fastani_matrix_file.exists():
+        print(f"# Step1: Run fastANI between all-vs-all {genome_num} genomes.")
         add_bin_path()
         run_fastani(genome_fasta_list_file, fastani_result_file, thread_num)
+    else:
+        print("# Step1: Previous fastANI matrix result found. Skip fastANI run.")
 
     # Parse ANI matrix as dataframe
     fastani_matrix_tsv_file = workdir / "fastani_matrix.tsv"
@@ -82,6 +88,7 @@ def run(
     min_ani = min(filter(lambda v: v != 0, all_values))
 
     # Hierarchical clustering ANI matrix
+    print("# Step2: Clustering fastANI matrix by scipy's UPGMA method.")
     linkage = hc.linkage(fastani_df, method="average")
 
     # Output dendrogram tree as newick format tree
@@ -94,6 +101,7 @@ def run(
         raise ValueError("Invalid hierarchy cluster detected!!")
 
     # Draw ANI clustermap
+    print("# Step3: Using clustered matrix, draw ANI clustermap by seaborn.\n")
     mycmap = LinearSegmentedColormap.from_list(
         "mycmap", colors=cmap_colors, gamma=cmap_gamma
     )
@@ -137,13 +145,16 @@ def write_genome_fasta_list(
     target_dir: Path,
     list_outfile: Path,
     exts: List[str] = ["fa", "fna", ".fna.gz", "fasta"],
-) -> None:
+) -> int:
     """Write genome fasta file list for fastANI run
 
     Args:
         target_dir (Path): Target genome fasta directory
         list_outfile (Path): List of Genome fasta file path
         exts (List[str]): Genome fasta extension list
+
+    Returns:
+        int: Number of genome fasta files
     """
     # Get target file path list
     file_path_list = []
@@ -154,6 +165,8 @@ def write_genome_fasta_list(
     contents = "\n".join([str(f) for f in file_path_list])
     with open(list_outfile, "w") as f:
         f.write(contents)
+
+    return len(file_path_list)
 
 
 def run_fastani(

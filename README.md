@@ -10,21 +10,25 @@
 
 ANIclustermap is easy-to-use tool for drawing ANI(Average Nucleotide Identity) clustermap between all-vs-all microbial genomes.
 
-![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/small_dataset/ANIclustermap_annotation.png)  
-Fig1. ANIclustermap between all-vs-all 18 genomes. If no similarity detected by fastANI, filled in gray.
-
 ![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/normal_dataset/ANIclustermap.png)  
-Fig2. ANIclustermap between all-vs-all 33 genomes.
+Fig1. ANI clustermap between all-vs-all 33 genomes.
+
+![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/small_dataset/ANIclustermap_annotation.png)  
+Fig2. ANI clustermap between all-vs-all 18 genomes. If no similarity detected by fastANI, filled in gray.
 
 ## Installation
 
 ANIclustermap is implemented in Python3. [fastANI](https://github.com/ParBLiSS/FastANI) is required to calculate ANI.
 
-Install PyPI stable version with pip:
+**Install bioconda package:**
+
+    conda install -c bioconda -c conda-forge aniclustermap
+
+**Install PyPI stable package:**
 
     pip install aniclustermap
 
-Install latest development version with pip:
+**Install latest development package:**
 
     pip install git+https://github.com/moshi4/ANIclustermap.git
 
@@ -60,7 +64,9 @@ Description of ANIclustermap's automated workflow.
 
 ### Example Command
 
-    ANIclustermap -i ./example/input/small_dataset/ -o ./aniclustermap_result --fig_width 15
+7 genomes minimal dataset. Click [here](https://github.com/moshi4/ANIclustermap/wiki/dataset/minimal_dataset.zip) to download dataset (Size=3.6MB).
+
+    ANIclustermap -i ./minimal_dataset/ -o ./ANIclustermap_result
 
 ## Output Contents
 
@@ -76,3 +82,41 @@ ANIclustermap outputs 3 types of files.
   Newick format clustering dendrogram.
 
 ## Gallery
+
+Example gallery of 33 genomes normal dataset.  
+If you want to try it for yourself, click [here](https://github.com/moshi4/ANIclustermap/wiki/dataset/normal_dataset.zip) to donwload dataset (Size=63.5MB).
+
+**Normal parameter:**
+
+    ANIclustermap -i ./normal_dataset -o ./ANIclustermap_result \
+                  --fig_width 15
+
+![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/gallery/01_ANIclustermap.png)  
+
+**Change cmap_gamma parameter:**
+
+    ANIclustermap -i ./normal_dataset -o ./ANIclustermap_result \ 
+                  --fig_width 15 --cmap_gamma 0.5
+
+![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/gallery/02_ANIclustermap.png)  
+
+**Change cmap_colors(=white,orange,red) paramter:**
+
+    ANIclustermap -i ./normal_dataset -o ./ANIclustermap_result \ 
+                  --fig_width 15 --cmap_colors white,orange,red
+
+![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/gallery/03_ANIclustermap.png)  
+
+**Change cmap_colors(=white,blue) paramter:**
+
+    ANIclustermap -i ./normal_dataset -o ./ANIclustermap_result \ 
+                  --fig_width 15 --cmap_colors white,blue
+
+![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/gallery/04_ANIclustermap.png)  
+
+**Add ANI value annotation parameter:**
+
+    ANIclustermap -i ./normal_dataset -o ./ANIclustermap_result \ 
+                  --fig_width 20 --fig_height 15 --annotation
+
+![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/gallery/05_ANIclustermap.png)  

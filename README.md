@@ -9,6 +9,7 @@
 ## Overview
 
 ANIclustermap is easy-to-use tool for drawing ANI(Average Nucleotide Identity) clustermap between all-vs-all microbial genomes.
+ANI between all-vs-all genomes are calculated by fastANI and clustermap is drawn using seaborn.
 
 ![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/normal_dataset/ANIclustermap.png)  
 Fig1. ANI clustermap between all-vs-all 33 genomes.

@@ -60,6 +60,7 @@ Description of ANIclustermap's automated workflow.
     --dendrogram_ratio   Dendrogram ratio to figsize (Default: 0.15)
     --cmap_colors        cmap interpolation colors parameter (Default: 'lime,yellow,red')
     --cmap_gamma         cmap gamma parameter (Default: 1.0)
+    --cmap_ranges        Range values (e.g. 80,90,95,100) for discrete cmap (Default: None)
     --annotation         Show ANI value annotation (Default: OFF)
     -v, --version        Print version information
 

@@ -114,6 +114,8 @@ If you want to try it for yourself, click [here](https://github.com/moshi4/ANIcl
     ANIclustermap -i ./normal_dataset -o ./ANIclustermap_result \ 
                   --fig_width 15 --cmap_ranges 80,85,90,92.5,95,97.5,100
 
+> See [this issue](https://github.com/moshi4/ANIclustermap/issues/1) for more details.
+
 ![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/gallery/04_ANIclustermap.png)  
 
 **Add ANI value annotation parameter:**

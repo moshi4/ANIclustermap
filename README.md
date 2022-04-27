@@ -108,10 +108,10 @@ If you want to try it for yourself, click [here](https://github.com/moshi4/ANIcl
 
 ![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/gallery/03_ANIclustermap.png)  
 
-**Change cmap_colors(=white,blue) paramter:**
+**Change cmap_ranges, cmap_colors paramter:**
 
     ANIclustermap -i ./normal_dataset -o ./ANIclustermap_result \ 
-                  --fig_width 15 --cmap_colors white,blue
+                  --fig_width 15 --cmap_ranges 80,85,90,92.5,95,97.5,100 --cmap_colors lightblue,blue
 
 ![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/gallery/04_ANIclustermap.png)  
 

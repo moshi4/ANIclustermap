@@ -8,13 +8,14 @@ import os
 import platform
 import subprocess as sp
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import scipy.cluster.hierarchy as hc
 import seaborn as sns
-from matplotlib.colors import LinearSegmentedColormap, is_color_like
 from scipy.cluster.hierarchy import ClusterNode
 from seaborn.matrix import ClusterGrid
 
@@ -33,6 +34,11 @@ def main():
     dendrogram_ratio: float = args.dendrogram_ratio
     cmap_colors: List[str] = args.cmap_colors.split(",")
     cmap_gamma: float = args.cmap_gamma
+    cmap_ranges: Optional[List[float]]
+    if args.cmap_ranges is None:
+        cmap_ranges = None
+    else:
+        cmap_ranges = [float(v) for v in args.cmap_ranges.split(",")]
     annotation: bool = args.annotation
 
     run(
@@ -44,6 +50,7 @@ def main():
         dendrogram_ratio,
         cmap_colors,
         cmap_gamma,
+        cmap_ranges,
         annotation,
     )
 
@@ -57,6 +64,7 @@ def run(
     dendrogram_ratio: float = 0.15,
     cmap_colors: List[str] = ["lime", "yellow", "red"],
     cmap_gamma: float = 1.0,
+    cmap_ranges: Optional[List[float]] = None,
     annotation: bool = False,
 ) -> None:
     """Run ANIclustermap workflow"""
@@ -102,12 +110,20 @@ def run(
 
     # Draw ANI clustermap
     print("# Step3: Using clustered matrix, draw ANI clustermap by seaborn.\n")
-    mycmap = LinearSegmentedColormap.from_list(
-        "mycmap", colors=cmap_colors, gamma=cmap_gamma
-    )
+    if cmap_ranges is None:
+        mycmap = mpl.colors.LinearSegmentedColormap.from_list(
+            "mycmap", colors=cmap_colors, gamma=cmap_gamma
+        )
+        opts = {}
+    else:
+        mycmap = mpl.colors.LinearSegmentedColormap.from_list(
+            "mycmap", colors=cmap_colors, gamma=cmap_gamma, N=len(cmap_ranges) - 1
+        )
+        opts = {"norm": mpl.colors.BoundaryNorm(cmap_ranges, len(cmap_ranges) - 1)}
     mycmap.set_under("lightgrey")
+
     g: ClusterGrid = sns.clustermap(
-        data=fastani_df,
+        data=np.floor(fastani_df * 10) / 10,
         col_linkage=linkage,
         row_linkage=linkage,
         figsize=(fig_width, fig_height),
@@ -117,16 +133,18 @@ def run(
         dendrogram_ratio=dendrogram_ratio,
         xticklabels=False,
         yticklabels=True,
-        vmin=min_ani,
+        vmin=np.floor(min_ani * 10) / 10,
         vmax=100,
         cbar=True,
         cbar_kws={
             "label": "ANI (%)",
             "orientation": "vertical",
+            "spacing": "proportional"
             # "extend": "min",
             # "extendfrac": 0.1,
         },
         tree_kws={"linewidths": 1.5},
+        **opts,
     )
     # Get clusterd fastani matrix dataframe
     clustered_fastani_df = get_clustered_matrix(fastani_df, g)
@@ -346,6 +364,13 @@ def get_args() -> argparse.Namespace:
         metavar="",
     )
     parser.add_argument(
+        "--cmap_ranges",
+        type=str,
+        help="Range values (e.g. 80,90,95,100) for discrete cmap (Default: None)",
+        default=None,
+        metavar="",
+    )
+    parser.add_argument(
         "--annotation",
         help="Show ANI value annotation (Default: OFF)",
         action="store_true",
@@ -361,9 +386,31 @@ def get_args() -> argparse.Namespace:
     args = parser.parse_args()
 
     # Validate cmap color string
-    for cmap_color in args.cmap_colors.split(","):
-        if not is_color_like(cmap_color):
-            parser.error(f"'{cmap_color}' is not valid color like string!!")
+    cmap_colors = args.cmap_colors.split(",")
+    for cmap_color in cmap_colors:
+        if not mpl.colors.is_color_like(cmap_color):
+            parser.error(
+                f"--cmap_colors: '{cmap_color}' is not valid color like string!!"
+            )
+    if len(cmap_colors) <= 1:
+        parser.error("--cmap_colors: Multiple colors are expected.")
+
+    # Validate range values for discrete cmap
+    if args.cmap_ranges is not None:
+        try:
+            cmap_ranges = [float(v) for v in args.cmap_ranges.split(",")]
+        except ValueError:
+            parser.error("--cmap_ranges: Contains Non-float values.")
+            exit(1)
+        if len(cmap_ranges) <= 1:
+            parser.error("--cmap_ranges: Multiple range values are expected.")
+        if cmap_ranges != sorted(cmap_ranges):
+            parser.error("--cmap_ranges: Specify range values in ascending order.")
+        for cmap_range in cmap_ranges:
+            if not 70 <= cmap_range <= 100:
+                parser.error("--cmap_ranges: Range values must be 70 <= value <= 100.")
+        if max(cmap_ranges) != 100:
+            parser.error("--cmap_ranges: Max range value must be 100.")
 
     return args
 

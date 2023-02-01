@@ -26,16 +26,17 @@ addopts = "--cov=src --tb=line --cov-report=xml --cov-report=term"
 testpaths = ["tests"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-pandas = "^1.4.1"
-seaborn = "^0.11.2"
+python = ">=3.8"
+pandas = ">=1.4.1"
+seaborn = ">=0.11.2"
+scipy = ">=1.9.0"
 
 [tool.poetry.dev-dependencies]
-black = "^22.1.0"
-flake8 = "^4.0.1"
-pydocstyle = "^6.1.1"
-pytest = "^7.1.1"
-pytest-cov = "^3.0.0"
+black = ">=22.1.0"
+flake8 = ">=4.0.1"
+pydocstyle = ">=6.1.1"
+pytest = ">=7.1.1"
+pytest-cov = ">=3.0.0"
 
 [tool.poetry.scripts]
 ANIclustermap = "aniclustermap.aniclustermap:main"

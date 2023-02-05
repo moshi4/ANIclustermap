@@ -8,7 +8,6 @@ import os
 import platform
 import subprocess as sp
 from pathlib import Path
-from typing import List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -26,35 +25,7 @@ def main():
     """ANIclustermap main function for entrypoint"""
     # Get argument values
     args = get_args()
-    indir: Path = args.indir
-    outdir: Path = args.outdir
-    mode: str = args.mode
-    thread_num: int = args.thread_num
-    width: int = args.fig_width
-    height: int = args.fig_height
-    dendrogram_ratio: float = args.dendrogram_ratio
-    cmap_colors: List[str] = args.cmap_colors.split(",")
-    cmap_gamma: float = args.cmap_gamma
-    cmap_ranges: Optional[List[float]]
-    if args.cmap_ranges is None:
-        cmap_ranges = None
-    else:
-        cmap_ranges = [float(v) for v in args.cmap_ranges.split(",")]
-    annotation: bool = args.annotation
-
-    run(
-        indir,
-        outdir,
-        mode,
-        thread_num,
-        width,
-        height,
-        dendrogram_ratio,
-        cmap_colors,
-        cmap_gamma,
-        cmap_ranges,
-        annotation,
-    )
+    run(**args.__dict__)
 
 
 def run(
@@ -65,9 +36,9 @@ def run(
     fig_width: int = 10,
     fig_height: int = 10,
     dendrogram_ratio: float = 0.15,
-    cmap_colors: List[str] = ["lime", "yellow", "red"],
+    cmap_colors: list[str] = ["lime", "yellow", "red"],
     cmap_gamma: float = 1.0,
-    cmap_ranges: Optional[List[float]] = None,
+    cmap_ranges: list[float] | None = None,
     annotation: bool = False,
 ) -> None:
     """Run ANIclustermap workflow"""
@@ -167,7 +138,7 @@ def run(
 def write_genome_fasta_list(
     target_dir: Path,
     list_outfile: Path,
-    exts: List[str] = ["fa", "fna", ".fna.gz", "fasta"],
+    exts: list[str] = ["fa", "fna", ".fna.gz", "fasta"],
 ) -> int:
     """Write genome fasta file list for fastANI run
 
@@ -245,8 +216,8 @@ def parse_ani_matrix(matrix_file: Path) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Dataframe of ANI matrix
     """
-    names: List[str] = []
-    ani_values_list: List[List[float]] = []
+    names: list[str] = []
+    ani_values_list: list[list[float]] = []
     with open(matrix_file) as f:
         reader = csv.reader(f, delimiter="\t")
         genome_num = int(next(reader)[0].rstrip("\n"))
@@ -266,7 +237,7 @@ def parse_ani_matrix(matrix_file: Path) -> pd.DataFrame:
 
 
 def dendrogram2newick(
-    node: ClusterNode, parent_dist: float, leaf_names: List[str], newick: str = ""
+    node: ClusterNode, parent_dist: float, leaf_names: list[str], newick: str = ""
 ) -> str:
     """Convert scipy dendrogram tree to newick format tree
 
@@ -441,6 +412,10 @@ def get_args() -> argparse.Namespace:
                 parser.error("--cmap_ranges: Range values must be 70 <= value <= 100.")
         if max(cmap_ranges) != 100:
             parser.error("--cmap_ranges: Max range value must be 100.")
+
+    args.cmap_colors = args.cmap_colors.split(",")
+    if args.cmap_ranges is not None:
+        args.cmap_ranges = [float(v) for v in args.cmap_ranges.split(",")]
 
     return args
 

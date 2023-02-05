@@ -10,12 +10,12 @@ import subprocess as sp
 from pathlib import Path
 from typing import List, Optional
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy.cluster.hierarchy as hc
 import seaborn as sns
+from matplotlib.colors import BoundaryNorm, LinearSegmentedColormap, is_color_like
 from scipy.cluster.hierarchy import ClusterNode
 from seaborn.matrix import ClusterGrid
 
@@ -28,6 +28,7 @@ def main():
     args = get_args()
     indir: Path = args.indir
     outdir: Path = args.outdir
+    mode: str = args.mode
     thread_num: int = args.thread_num
     width: int = args.fig_width
     height: int = args.fig_height
@@ -44,6 +45,7 @@ def main():
     run(
         indir,
         outdir,
+        mode,
         thread_num,
         width,
         height,
@@ -58,6 +60,7 @@ def main():
 def run(
     indir: Path,
     outdir: Path,
+    mode: str = "fastani",
     thread_num: int = 1,
     fig_width: int = 10,
     fig_height: int = 10,
@@ -72,58 +75,62 @@ def run(
     workdir = outdir / "work"
     workdir.mkdir(exist_ok=True)
 
-    # Run fastANI
+    # Run ANI calculation
     genome_fasta_list_file = workdir / "genome_fasta_file_list.txt"
     genome_num = write_genome_fasta_list(indir, genome_fasta_list_file)
     if genome_num <= 1:
         print("ERROR: Number of input genome fasta file is less than 1.")
         exit(1)
 
-    fastani_result_file = workdir / "fastani_result"
-    fastani_matrix_file = Path(str(fastani_result_file) + ".matrix")
-    if not fastani_matrix_file.exists():
-        print(f"# Step1: Run fastANI between all-vs-all {genome_num} genomes.")
+    ani_result_file = workdir / f"{mode}_result"
+    ani_matrix_file = Path(str(ani_result_file) + ".matrix")
+    if not ani_matrix_file.exists():
+        print(f"# Step1: Run {mode} between all-vs-all {genome_num} genomes.")
         add_bin_path()
-        run_fastani(genome_fasta_list_file, fastani_result_file, thread_num)
+        if mode == "fastani":
+            run_fastani(genome_fasta_list_file, ani_result_file, thread_num)
+        else:
+            run_skani(indir, ani_matrix_file, thread_num)
     else:
-        print("# Step1: Previous fastANI matrix result found. Skip fastANI run.")
+        print(f"# Step1: Previous {mode} matrix result found. Skip {mode} run.")
 
     # Parse ANI matrix as dataframe
-    fastani_matrix_tsv_file = workdir / "fastani_matrix.tsv"
-    fastani_df = parse_fastani_matrix(fastani_matrix_file)
-    fastani_df.to_csv(fastani_matrix_tsv_file, sep="\t", index=False)
-    all_values = itertools.chain.from_iterable(fastani_df.values.tolist())
+    ani_matrix_tsv_file = workdir / f"{mode}_matrix.tsv"
+    ani_df = parse_ani_matrix(ani_matrix_file)
+    ani_df.to_csv(ani_matrix_tsv_file, sep="\t", index=False)
+    all_values = itertools.chain.from_iterable(ani_df.values.tolist())
     min_ani = min(filter(lambda v: v != 0, all_values))
 
     # Hierarchical clustering ANI matrix
-    print("# Step2: Clustering fastANI matrix by scipy's UPGMA method.")
-    linkage = hc.linkage(fastani_df, method="average")
+    print(f"# Step2: Clustering {mode} matrix by scipy's UPGMA method.")
+    linkage = hc.linkage(ani_df, method="average")
 
     # Output dendrogram tree as newick format tree
     tree = hc.to_tree(linkage)
     if isinstance(tree, ClusterNode):
         dendrogram_newick_file = outdir / "ANIclustermap_dendrogram.nwk"
         with open(dendrogram_newick_file, "w") as f:
-            f.write(dendrogram2newick(tree, tree.dist, list(fastani_df.columns)))
+            leaf_names = list(map(str, ani_df.columns))
+            f.write(dendrogram2newick(tree, tree.dist, leaf_names))
     else:
         raise ValueError("Invalid hierarchy cluster detected!!")
 
     # Draw ANI clustermap
     print("# Step3: Using clustered matrix, draw ANI clustermap by seaborn.\n")
     if cmap_ranges is None:
-        mycmap = mpl.colors.LinearSegmentedColormap.from_list(
+        mycmap = LinearSegmentedColormap.from_list(
             "mycmap", colors=cmap_colors, gamma=cmap_gamma
         )
         opts = {}
     else:
-        mycmap = mpl.colors.LinearSegmentedColormap.from_list(
+        mycmap = LinearSegmentedColormap.from_list(
             "mycmap", colors=cmap_colors, gamma=cmap_gamma, N=len(cmap_ranges) - 1
         )
-        opts = {"norm": mpl.colors.BoundaryNorm(cmap_ranges, len(cmap_ranges) - 1)}
+        opts = {"norm": BoundaryNorm(cmap_ranges, len(cmap_ranges) - 1)}
     mycmap.set_under("lightgrey")
 
     g: ClusterGrid = sns.clustermap(
-        data=np.floor(fastani_df * 10) / 10,
+        data=np.floor(ani_df * 10) / 10,
         col_linkage=linkage,
         row_linkage=linkage,
         figsize=(fig_width, fig_height),
@@ -146,17 +153,15 @@ def run(
         tree_kws={"linewidths": 1.5},
         **opts,
     )
-    # Get clusterd fastani matrix dataframe
-    clustered_fastani_df = get_clustered_matrix(fastani_df, g)
-    clustered_fastani_matrix_tsv_file = outdir / "ANIclustermap_matrix.tsv"
-    clustered_fastani_df.to_csv(
-        clustered_fastani_matrix_tsv_file, sep="\t", index=False
-    )
+    # Get clusterd ani matrix dataframe
+    clustered_ani_df = get_clustered_matrix(ani_df, g)
+    clustered_ani_matrix_tsv_file = outdir / "ANIclustermap_matrix.tsv"
+    clustered_ani_df.to_csv(clustered_ani_matrix_tsv_file, sep="\t", index=False)
 
     # Output ANI clustermap figure
-    fastani_clustermap_file = outdir / "ANIclustermap.png"
-    plt.savefig(fastani_clustermap_file)
-    plt.savefig(fastani_clustermap_file.with_suffix(".svg"))
+    ani_clustermap_file = outdir / "ANIclustermap.png"
+    plt.savefig(ani_clustermap_file)
+    plt.savefig(ani_clustermap_file.with_suffix(".svg"))
 
 
 def write_genome_fasta_list(
@@ -199,13 +204,27 @@ def run_fastani(
         fastani_result_file (Path): fastANI result output file
         thread_num (int): Thread number for fastANI run
     """
-    cmd = (
-        f"fastANI --ql {genome_fasta_list_file} --rl {genome_fasta_list_file} "
-        + f"-o {fastani_result_file} -t {thread_num} --matrix"
-    )
+    cmd = f"fastANI --ql {genome_fasta_list_file} --rl {genome_fasta_list_file} "
+    cmd += f"-o {fastani_result_file} -t {thread_num} --matrix"
     sp.run(cmd, shell=True)
     if fastani_result_file.exists():
         fastani_result_file.unlink()
+
+
+def run_skani(
+    genome_dir: str | Path,
+    result_file: str | Path,
+    thread_num: int,
+) -> None:
+    """Run skani
+
+    Args:
+        genome_dir (str | Path): Genome fasta directory
+        result_file (str | Path): skani result output file
+        thread_num (int): Thread number for skani run
+    """
+    cmd = f"skani triangle {genome_dir}/* -o {result_file} -t {thread_num}"
+    sp.run(cmd, shell=True)
 
 
 def add_bin_path() -> None:
@@ -217,14 +236,14 @@ def add_bin_path() -> None:
     os.environ["PATH"] = env_path
 
 
-def parse_fastani_matrix(matrix_file: Path) -> pd.DataFrame:
-    """Parse fastANI matrix as Dataframe
+def parse_ani_matrix(matrix_file: Path) -> pd.DataFrame:
+    """Parse ANI matrix as Dataframe
 
     Args:
-        matrix_file (Path): fastANI All-vs-All ANI matrix file
+        matrix_file (Path): All-vs-All ANI matrix file
 
     Returns:
-        pd.DataFrame: Dataframe of fastANI matrix
+        pd.DataFrame: Dataframe of ANI matrix
     """
     names: List[str] = []
     ani_values_list: List[List[float]] = []
@@ -267,6 +286,8 @@ def dendrogram2newick(
             newick = f"):{(parent_dist - node.dist):.2f}{newick}"
         else:
             newick = ");"
+        if node.left is None or node.right is None:
+            raise ValueError
         newick = dendrogram2newick(node.left, node.dist, leaf_names, newick)
         newick = dendrogram2newick(node.right, node.dist, leaf_names, f",{newick}")
         newick = f"({newick}"
@@ -313,13 +334,23 @@ def get_args() -> argparse.Namespace:
         help="Output directory",
         metavar="O",
     )
+    default_mode = "fastani"
+    parser.add_argument(
+        "-m",
+        "--mode",
+        type=str,
+        help="ANI calculation mode ('fastani'[default]|'skani')",
+        default=default_mode,
+        choices=["fastani", "skani"],
+        metavar="",
+    )
     cpu_num = os.cpu_count()
     default_thread_num = 1 if cpu_num is None or cpu_num == 1 else cpu_num - 1
     parser.add_argument(
         "-t",
         "--thread_num",
         type=int,
-        help=f"fastANI thread number parameter (Default: {default_thread_num})",
+        help=f"Thread number parameter (Default: {default_thread_num})",
         default=default_thread_num,
         metavar="",
     )
@@ -388,7 +419,7 @@ def get_args() -> argparse.Namespace:
     # Validate cmap color string
     cmap_colors = args.cmap_colors.split(",")
     for cmap_color in cmap_colors:
-        if not mpl.colors.is_color_like(cmap_color):
+        if not is_color_like(cmap_color):
             parser.error(
                 f"--cmap_colors: '{cmap_color}' is not valid color like string!!"
             )
@@ -401,7 +432,6 @@ def get_args() -> argparse.Namespace:
             cmap_ranges = [float(v) for v in args.cmap_ranges.split(",")]
         except ValueError:
             parser.error("--cmap_ranges: Contains Non-float values.")
-            exit(1)
         if len(cmap_ranges) <= 1:
             parser.error("--cmap_ranges: Multiple range values are expected.")
         if cmap_ranges != sorted(cmap_ranges):

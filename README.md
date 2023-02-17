@@ -20,7 +20,10 @@ Fig2. ANI clustermap between all-vs-all 18 genomes. If no similarity detected by
 
 ## Installation
 
-ANIclustermap is implemented in Python3. [fastANI](https://github.com/ParBLiSS/FastANI) is required to calculate ANI.  
+`Python 3.8 or later` is required for installation. [fastANI](https://github.com/ParBLiSS/FastANI) is required to calculate ANI.  
+
+> :information_source: From ANIclustermap v1.2.0, ANI calculation with [skani](https://github.com/bluenote-1577/skani) is also supported.
+> This is still an experimental implementation and is being tested with skani v0.1.0. Please install skani if needed.
 
 **Install bioconda package:**
 
@@ -33,9 +36,6 @@ ANIclustermap is implemented in Python3. [fastANI](https://github.com/ParBLiSS/F
 **Install latest development package:**
 
     pip install git+https://github.com/moshi4/ANIclustermap.git
-
-> :information_source: From ANIclustermap v1.2.0, ANI calculation with [skani](https://github.com/bluenote-1577/skani) is also supported.
-> This is still an experimental implementation and is being tested with skani v0.1.0. Please install skani if needed.
 
 ## Workflow
 

@@ -6,6 +6,7 @@ import csv
 import itertools
 import os
 import platform
+import re
 import subprocess as sp
 from pathlib import Path
 
@@ -222,7 +223,9 @@ def parse_ani_matrix(matrix_file: Path) -> pd.DataFrame:
         reader = csv.reader(f, delimiter="\t")
         genome_num = int(next(reader)[0].rstrip("\n"))
         for row in reader:
-            names.append(Path(row[0]).with_suffix("").name.rstrip(".fna"))
+            name = Path(row[0]).with_suffix("").name
+            name = re.sub("\\.fna$", "", name)
+            names.append(name)
             ani_values = list(map(lambda d: 0.0 if d == "NA" else float(d), row[1:]))
             ani_values.extend([0] * (genome_num - len(ani_values)))
             ani_values_list.append(ani_values)

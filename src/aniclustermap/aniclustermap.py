@@ -34,6 +34,7 @@ def run(
     outdir: Path,
     mode: str = "fastani",
     thread_num: int = 1,
+    overwrite: bool = False,
     fig_width: int = 10,
     fig_height: int = 10,
     dendrogram_ratio: float = 0.15,
@@ -41,6 +42,7 @@ def run(
     cmap_gamma: float = 1.0,
     cmap_ranges: list[float] | None = None,
     annotation: bool = False,
+    skani_c_param: int = 30,
 ) -> None:
     """Run ANIclustermap workflow"""
     outdir.mkdir(exist_ok=True)
@@ -56,13 +58,15 @@ def run(
 
     ani_result_file = workdir / f"{mode}_result"
     ani_matrix_file = Path(str(ani_result_file) + ".matrix")
-    if not ani_matrix_file.exists():
+    if not ani_matrix_file.exists() or overwrite:
         print(f"# Step1: Run {mode} between all-vs-all {genome_num} genomes.")
         add_bin_path()
         if mode == "fastani":
             run_fastani(genome_fasta_list_file, ani_result_file, thread_num)
         else:
-            run_skani(indir, ani_matrix_file, thread_num)
+            run_skani(
+                genome_fasta_list_file, ani_matrix_file, thread_num, skani_c_param
+            )
     else:
         print(f"# Step1: Previous {mode} matrix result found. Skip {mode} run.")
 
@@ -184,18 +188,21 @@ def run_fastani(
 
 
 def run_skani(
-    genome_dir: str | Path,
+    genome_fasta_list_file: Path,
     result_file: str | Path,
     thread_num: int,
+    c_param: int = 30,
 ) -> None:
     """Run skani
 
     Args:
-        genome_dir (str | Path): Genome fasta directory
+        genome_fasta_list_file (Path): Genome fasta file list
         result_file (str | Path): skani result output file
         thread_num (int): Thread number for skani run
+        c_param (int): Compression factor parameter
     """
-    cmd = f"skani triangle {genome_dir}/* -o {result_file} -t {thread_num}"
+    cmd = f"skani triangle -l {genome_fasta_list_file} -o {result_file} "
+    cmd += f"-t {thread_num} -c {c_param}"
     sp.run(cmd, shell=True)
 
 
@@ -290,7 +297,7 @@ def get_args() -> argparse.Namespace:
         argparse.Namespace: Argument values
     """
     description = "Draw ANI(Average Nucleotide Identity) clustermap"
-    parser = argparse.ArgumentParser(description=description)
+    parser = argparse.ArgumentParser(description=description, add_help=False)
 
     parser.add_argument(
         "-i",
@@ -327,6 +334,11 @@ def get_args() -> argparse.Namespace:
         help=f"Thread number parameter (Default: {default_thread_num})",
         default=default_thread_num,
         metavar="",
+    )
+    parser.add_argument(
+        "--overwrite",
+        help="Overwrite previous ANI calculation result (Default: OFF)",
+        action="store_true",
     )
     default_fig_width = 10
     parser.add_argument(
@@ -386,6 +398,20 @@ def get_args() -> argparse.Namespace:
         action="version",
         version=f"v{__version__}",
         help="Print version information",
+    )
+    parser.add_argument(
+        "-h",
+        "--help",
+        help="Show this help message and exit",
+        action="help",
+    )
+
+    default_skani_c_param = 30
+    parser.add_argument(
+        "--skani_c_param",
+        type=int,
+        help=argparse.SUPPRESS,
+        default=default_skani_c_param,
     )
 
     args = parser.parse_args()

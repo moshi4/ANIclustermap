@@ -9,7 +9,8 @@
 ## Overview
 
 ANIclustermap is easy-to-use tool for drawing ANI(Average Nucleotide Identity) clustermap between all-vs-all microbial genomes.
-ANI between all-vs-all genomes are calculated by fastANI and clustermap is drawn using seaborn.
+ANI between all-vs-all genomes are calculated by [fastANI](https://github.com/ParBLiSS/FastANI)
+(or [skani](https://github.com/bluenote-1577/skani)) and clustermap is drawn using seaborn.
 
 ![ANIclustermap.png](https://raw.githubusercontent.com/moshi4/ANIclustermap/main/images/normal_dataset/ANIclustermap.png)  
 Fig1. ANI clustermap between all-vs-all 33 genomes.
@@ -19,7 +20,7 @@ Fig2. ANI clustermap between all-vs-all 18 genomes. If no similarity detected by
 
 ## Installation
 
-ANIclustermap is implemented in Python3. [fastANI](https://github.com/ParBLiSS/FastANI) is required to calculate ANI.
+ANIclustermap is implemented in Python3. [fastANI](https://github.com/ParBLiSS/FastANI) is required to calculate ANI.  
 
 **Install bioconda package:**
 
@@ -33,11 +34,14 @@ ANIclustermap is implemented in Python3. [fastANI](https://github.com/ParBLiSS/F
 
     pip install git+https://github.com/moshi4/ANIclustermap.git
 
+> :information_source: From ANIclustermap v1.2.0, ANI calculation with [skani](https://github.com/bluenote-1577/skani) is also supported.
+> This is still an experimental implementation and is being tested with skani v0.1.0. Please install skani if needed.
+
 ## Workflow
 
 Description of ANIclustermap's automated workflow.
 
-1. Calculate ANI between all-vs-all microbial genomes by fastANI.  
+1. Calculate ANI between all-vs-all microbial genomes by fastANI (or skani).  
    If no similarity detected by fastANI, NA is output. In that case, NA is replaced by 0.0.  
    If previous result available at the time of re-run, reuse previous result.
 2. Clustering ANI matrix by scipy's UPGMA method.  
@@ -51,10 +55,11 @@ Description of ANIclustermap's automated workflow.
 
 ### Options
 
-    -h, --help           show this help message and exit
     -i I, --indir I      Input genome fasta directory (*.fa|*.fna[.gz]|*.fasta)
     -o O, --outdir O     Output directory
-    -t , --thread_num    fastANI thread number parameter (Default: MaxThread - 1)
+    -m , --mode          ANI calculation mode ('fastani'[default]|'skani')
+    -t , --thread_num    Thread number parameter (Default: MaxThread - 1)
+    --overwrite          Overwrite previous ANI calculation result (Default: OFF)
     --fig_width          Figure width (Default: 10)
     --fig_height         Figure height (Default: 10)
     --dendrogram_ratio   Dendrogram ratio to figsize (Default: 0.15)
@@ -63,6 +68,7 @@ Description of ANIclustermap's automated workflow.
     --cmap_ranges        Range values (e.g. 80,90,95,100) for discrete cmap (Default: None)
     --annotation         Show ANI value annotation (Default: OFF)
     -v, --version        Print version information
+    -h, --help           Show this help message and exit
 
 ### Example Command
 

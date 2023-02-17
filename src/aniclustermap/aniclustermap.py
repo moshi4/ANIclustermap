@@ -19,7 +19,7 @@ from matplotlib.colors import BoundaryNorm, LinearSegmentedColormap, is_color_li
 from scipy.cluster.hierarchy import ClusterNode
 from seaborn.matrix import ClusterGrid
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 
 def main():

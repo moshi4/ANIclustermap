@@ -14,13 +14,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.8, 3.9, "3.10"]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Python ${{ matrix.python-version}}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -40,11 +40,3 @@ jobs:
 
       - name: Run pytest
         run: poetry run pytest tests --tb=line --cov=src --cov-report=xml --cov-report=term
-
-      # - name: Upload coverage to Codecov
-      #   if: ${{ matrix.python-version==3.8 }} && ${{ matrix.os=='ubuntu-latest' }}
-      #   uses: codecov/codecov-action@v2
-      #   with:
-      #     name: pytest-codecov
-      #     files: coverage.xml
-      #     fail_ci_if_error: true

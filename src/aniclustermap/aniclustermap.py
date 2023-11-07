@@ -147,15 +147,22 @@ def write_genome_fasta_list(
     list_outfile: Path,
     exts: list[str] = ["fa", "fna", ".fna.gz", "fasta"],
 ) -> int:
-    """Write genome fasta file list for fastANI run
+    """Write genome fasta file list for ANI comparison
 
-    Args:
-        target_dir (Path): Target genome fasta directory
-        list_outfile (Path): List of Genome fasta file path
-        exts (List[str]): Genome fasta extension list
+    Parameters
+    ----------
+    target_dir : Path
+        Target genome fasta directory
+    list_outfile : Path
+        List of genome fasta file path
+    exts : list[str] | None, optional
+        Genome fasta target extension list
+        (Default: `.fa`,`.fna`,`.fna.gz`,`.fasta`)
 
-    Returns:
-        int: Number of genome fasta files
+    Returns
+    -------
+    count : int
+        Number of file
     """
     # Get target file path list
     file_path_list = []
@@ -177,10 +184,14 @@ def run_fastani(
 ) -> None:
     """Run fastANI
 
-    Args:
-        genome_fasta_list_file (Path): Genome fasta file list
-        fastani_result_file (Path): fastANI result output file
-        thread_num (int): Thread number for fastANI run
+    Parameters
+    ----------
+    genome_fasta_list_file : Path
+        Genome fasta file list
+    fastani_result_file : Path
+        fastANI result output file
+    thread_num : int
+        Thread number for fastANI run
     """
     cmd = f"fastANI --ql {genome_fasta_list_file} --rl {genome_fasta_list_file} "
     cmd += f"-o {fastani_result_file} -t {thread_num} --matrix"
@@ -197,11 +208,16 @@ def run_skani(
 ) -> None:
     """Run skani
 
-    Args:
-        genome_fasta_list_file (Path): Genome fasta file list
-        result_file (str | Path): skani result output file
-        thread_num (int): Thread number for skani run
-        c_param (int): Compression factor parameter
+    Parameters
+    ----------
+    genome_fasta_list_file : Path
+        Genome fasta file list
+    result_file : str | Path
+        skani result output file
+    thread_num : int
+        Thread number for skani run
+    c_param : int, optional
+        Compression factor parameter
     """
     cmd = f"skani triangle -l {genome_fasta_list_file} -o {result_file} "
     cmd += f"-t {thread_num} -c {c_param}"
@@ -220,11 +236,15 @@ def add_bin_path() -> None:
 def parse_ani_matrix(matrix_file: Path) -> pd.DataFrame:
     """Parse ANI matrix as Dataframe
 
-    Args:
-        matrix_file (Path): All-vs-All ANI matrix file
+    Parameters
+    ----------
+    matrix_file : Path
+        All-vs-All ANI matrix file
 
-    Returns:
-        pd.DataFrame: Dataframe of ANI matrix
+    Returns
+    -------
+    df : pd.DataFrame
+        Dataframe of ANI matrix
     """
     names: list[str] = []
     ani_values_list: list[list[float]] = []
@@ -253,14 +273,21 @@ def dendrogram2newick(
 ) -> str:
     """Convert scipy dendrogram tree to newick format tree
 
-    Args:
-        node (ClusterNode): Tree node
-        parent_dist (float): Parent distance
-        leaf_names (List[str]): Leaf names
-        newick (str): newick format string (Used in recursion)
+    Parameters
+    ----------
+    node : ClusterNode
+        Tree node
+    parent_dist : float
+        Parent distance
+    leaf_names : list[str]
+        Leaf names
+    newick : str, optional
+        Newick format string (Used in recursion)
 
-    Returns:
-        str: Newick format tree
+    Returns
+    -------
+    newick : str
+        Newick format tree
     """
     if node.is_leaf():
         return f"{leaf_names[node.id]}:{(parent_dist - node.dist):.2f}{newick}"
@@ -280,12 +307,17 @@ def dendrogram2newick(
 def get_clustered_matrix(original_df: pd.DataFrame, g: ClusterGrid) -> pd.DataFrame:
     """Get clustered ANI matrix
 
-    Args:
-        original_df (pd.DataFrame): Original dataframe before clusterring
-        g (ClusterGrid): Cluster grid ('clustermap' return value)
+    Parameters
+    ----------
+    original_df : pd.DataFrame
+        Original dataframe before clustering
+    g : ClusterGrid
+        Cluster grid (`clustermap` return value)
 
-    Returns:
-        pd.DataFrame: Clustered matrix dataframe
+    Returns
+    -------
+    df : pd.DataFrame
+        Clustered matrix dataframe
     """
     clustered_row_index = original_df.index[g.dendrogram_row.reordered_ind]
     clustered_col_index = original_df.columns[g.dendrogram_col.reordered_ind]
@@ -295,8 +327,10 @@ def get_clustered_matrix(original_df: pd.DataFrame, g: ClusterGrid) -> pd.DataFr
 def get_args() -> argparse.Namespace:
     """Get arguments
 
-    Returns:
-        argparse.Namespace: Argument values
+    Returns
+    -------
+    args : argparse.Namespace
+        Argument values
     """
     description = "Draw ANI(Average Nucleotide Identity) clustermap"
     parser = argparse.ArgumentParser(description=description, add_help=False)

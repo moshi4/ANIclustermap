@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from __future__ import annotations
 
 import argparse
@@ -38,7 +37,7 @@ def run(
     fig_width: int = 10,
     fig_height: int = 10,
     dendrogram_ratio: float = 0.15,
-    cmap_colors: list[str] = ["lime", "yellow", "red"],
+    cmap_colors: list[str] | None = None,
     cmap_gamma: float = 1.0,
     cmap_ranges: list[float] | None = None,
     cbar_pos: tuple[float, float, float, float] = (0.02, 0.8, 0.05, 0.18),
@@ -94,6 +93,7 @@ def run(
 
     # Draw ANI clustermap
     print("# Step3: Using clustered matrix, draw ANI clustermap by seaborn.\n")
+    cmap_colors = ["lime", "yellow", "red"] if cmap_colors is None else cmap_colors
     if cmap_ranges is None:
         mycmap = LinearSegmentedColormap.from_list(
             "mycmap", colors=cmap_colors, gamma=cmap_gamma
@@ -145,7 +145,7 @@ def run(
 def write_genome_fasta_list(
     target_dir: Path,
     list_outfile: Path,
-    exts: list[str] = ["fa", "fna", ".fna.gz", "fasta"],
+    exts: list[str] | None = None,
 ) -> int:
     """Write genome fasta file list for ANI comparison
 
@@ -166,6 +166,7 @@ def write_genome_fasta_list(
     """
     # Get target file path list
     file_path_list = []
+    exts = [".fa", ".fna", ".fna.gz", ".fasta"] if exts is None else exts
     for ext in exts:
         file_path_list.extend(target_dir.glob(f"*{ext}"))
 

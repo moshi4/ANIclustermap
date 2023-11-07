@@ -41,6 +41,7 @@ def run(
     cmap_colors: list[str] = ["lime", "yellow", "red"],
     cmap_gamma: float = 1.0,
     cmap_ranges: list[float] | None = None,
+    cbar_pos: tuple[float, float, float, float] = (0.02, 0.8, 0.05, 0.18),
     annotation: bool = False,
     skani_c_param: int = 30,
 ) -> None:
@@ -119,6 +120,7 @@ def run(
         vmin=np.floor(min_ani * 10) / 10,
         vmax=100,
         cbar=True,
+        cbar_pos=cbar_pos,
         cbar_kws={
             "label": "ANI (%)",
             "orientation": "vertical",
@@ -127,7 +129,7 @@ def run(
             # "extendfrac": 0.1,
         },
         tree_kws={"linewidths": 1.5},
-        **opts,
+        **opts,  # type: ignore
     )
     # Get clusterd ani matrix dataframe
     clustered_ani_df = get_clustered_matrix(ani_df, g)
@@ -385,6 +387,15 @@ def get_args() -> argparse.Namespace:
         type=str,
         help="Range values (e.g. 80,90,95,100) for discrete cmap (Default: None)",
         default=None,
+        metavar="",
+    )
+    default_cbar_pos = (0.02, 0.8, 0.05, 0.18)
+    parser.add_argument(
+        "--cbar_pos",
+        type=float,
+        nargs=4,
+        help=f"Colorbar position (Default: {default_cbar_pos})",
+        default=default_cbar_pos,
         metavar="",
     )
     parser.add_argument(

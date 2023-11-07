@@ -20,22 +20,16 @@ Fig2. ANI clustermap between all-vs-all 18 genomes. If no similarity detected by
 
 ## Installation
 
-`Python 3.8 or later` is required for installation. [fastANI](https://github.com/ParBLiSS/FastANI) is required to calculate ANI.  
-
-> :information_source: From ANIclustermap v1.2.0, ANI calculation with [skani](https://github.com/bluenote-1577/skani) is also supported.
-> This is still an experimental implementation and is being tested with skani v0.1.0. Please install skani if needed.
+`Python 3.8 or later` is required for installation.
+[fastANI](https://github.com/ParBLiSS/FastANI) or [skani](https://github.com/bluenote-1577/skani) is required to calculate ANI.  
 
 **Install bioconda package:**
 
-    conda install -c bioconda -c conda-forge aniclustermap
+    conda install -c conda-forge -c bioconda aniclustermap
 
 **Install PyPI stable package:**
 
     pip install aniclustermap
-
-**Install latest development package:**
-
-    pip install git+https://github.com/moshi4/ANIclustermap.git
 
 ## Workflow
 
@@ -66,6 +60,7 @@ Description of ANIclustermap's automated workflow.
     --cmap_colors        cmap interpolation colors parameter (Default: 'lime,yellow,red')
     --cmap_gamma         cmap gamma parameter (Default: 1.0)
     --cmap_ranges        Range values (e.g. 80,90,95,100) for discrete cmap (Default: None)
+    --cbar_pos           Colorbar position (Default: (0.02, 0.8, 0.05, 0.18))
     --annotation         Show ANI value annotation (Default: OFF)
     -v, --version        Print version information
     -h, --help           Show this help message and exit

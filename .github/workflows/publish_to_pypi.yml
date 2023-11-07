@@ -19,10 +19,11 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Install Dependencies
+      - name: Install Poetry
         run: |
-          python -m pip install --upgrade pip
-          pip install poetry poetry-dynamic-versioning
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
       - name: Build
         run: poetry build
 

@@ -108,7 +108,7 @@ def run(
     mycmap.set_under("lightgrey")
 
     g: ClusterGrid = sns.clustermap(
-        data=np.floor(ani_df * 10) / 10,
+        data=ani_df,
         col_linkage=linkage,
         row_linkage=linkage,
         figsize=(fig_width, fig_height),
@@ -118,7 +118,7 @@ def run(
         dendrogram_ratio=dendrogram_ratio,
         xticklabels=False,
         yticklabels=True,
-        vmin=np.floor(min_ani * 10) / 10,
+        vmin=min_ani,
         vmax=100,
         cbar=True,
         cbar_pos=cbar_pos,

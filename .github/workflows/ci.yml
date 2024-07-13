@@ -33,10 +33,10 @@ jobs:
         run: poetry install -n
 
       - name: Run ruff lint check
-        run: ruff check --diff
+        run: poetry run ruff check --diff
 
       - name: Run ruff format check
-        run: ruff format --check --diff
+        run: poetry run ruff format --check --diff
 
       - name: Run pytest
-        run: pytest
+        run: poetry run pytest

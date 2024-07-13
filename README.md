@@ -49,21 +49,28 @@ Description of ANIclustermap's automated workflow.
 
 ### Options
 
-    -i I, --indir I      Input genome fasta directory (*.fa|*.fna[.gz]|*.fasta)
-    -o O, --outdir O     Output directory
-    -m , --mode          ANI calculation mode ('fastani'[default]|'skani')
-    -t , --thread_num    Thread number parameter (Default: MaxThread - 1)
-    --overwrite          Overwrite previous ANI calculation result (Default: OFF)
-    --fig_width          Figure width (Default: 10)
-    --fig_height         Figure height (Default: 10)
-    --dendrogram_ratio   Dendrogram ratio to figsize (Default: 0.15)
-    --cmap_colors        cmap interpolation colors parameter (Default: 'lime,yellow,red')
-    --cmap_gamma         cmap gamma parameter (Default: 1.0)
-    --cmap_ranges        Range values (e.g. 80,90,95,100) for discrete cmap (Default: None)
-    --cbar_pos           Colorbar position (Default: (0.02, 0.8, 0.05, 0.18))
-    --annotation         Show ANI value annotation (Default: OFF)
-    -v, --version        Print version information
-    -h, --help           Show this help message and exit
+    $ ANIclustermap --help
+    usage: ANIclustermap -i [Genome fasta directory] -o [output directory]
+
+    Draw ANI(Average Nucleotide Identity) clustermap
+
+    optional arguments:
+      -i I, --indir I      Input genome fasta directory (*.fa|*.fna[.gz]|*.fasta)
+      -o O, --outdir O     Output directory
+      -m , --mode          ANI calculation mode ('fastani'[default]|'skani')
+      -t , --thread_num    Thread number parameter (Default: MaxThread - 1)
+      --overwrite          Overwrite previous ANI calculation result (Default: OFF)
+      --fig_width          Figure width (Default: 10)
+      --fig_height         Figure height (Default: 10)
+      --dendrogram_ratio   Dendrogram ratio to figsize (Default: 0.15)
+      --cmap_colors        cmap interpolation colors parameter (Default: 'lime,yellow,red')
+      --cmap_gamma         cmap gamma parameter (Default: 1.0)
+      --cmap_ranges        Range values (e.g. 80,90,95,100) for discrete cmap (Default: None)
+      --cbar_pos           Colorbar position (Default: (0.02, 0.8, 0.05, 0.18))
+      --annotation         Show ANI value annotation (Default: OFF)
+      --annotation_fmt     Annotation value format (Default: '.3g')
+      -v, --version        Print version information
+      -h, --help           Show this help message and exit
 
 ### Example Command
 

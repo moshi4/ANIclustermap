@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aniclustermap"
-version = "1.3.0"
+version = "1.4.0"
 description = "A tool for drawing ANI clustermap between all-vs-all microbial genomes"
 authors = ["moshi"]
 license = "MIT"
@@ -22,7 +22,7 @@ include = ["tests"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--cov=src --tb=line --cov-report=xml --cov-report=term"
+addopts = "--cov=src --tb=long --cov-report=xml --cov-report=term"
 testpaths = ["tests"]
 
 # Lint Rules: https://beta.ruff.rs/docs/rules
@@ -53,8 +53,7 @@ seaborn = ">=0.11.2"
 scipy = ">=1.9.0"
 
 [tool.poetry.group.dev.dependencies]
-black = ">=22.1.0"
-ruff = ">=0.0.264"
+ruff = ">=0.4.0"
 pytest = ">=7.1.1"
 pytest-cov = ">=3.0.0"
 

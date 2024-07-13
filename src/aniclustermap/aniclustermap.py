@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import argparse
 import csv
-import itertools
 import os
 import platform
 import re
+import shlex
 import subprocess as sp
 from pathlib import Path
+from typing import Literal
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy.cluster.hierarchy as hc
@@ -18,7 +18,13 @@ from matplotlib.colors import BoundaryNorm, LinearSegmentedColormap, is_color_li
 from scipy.cluster.hierarchy import ClusterNode
 from seaborn.matrix import ClusterGrid
 
+from aniclustermap.logger import get_logger
+
 __version__ = "1.3.0"
+
+logger = get_logger("aniclustermap")
+
+RUN_MODE = Literal["fastani", "skani"]
 
 
 def main():
@@ -31,7 +37,7 @@ def main():
 def run(
     indir: Path,
     outdir: Path,
-    mode: str = "fastani",
+    mode: RUN_MODE = "fastani",
     thread_num: int = 1,
     overwrite: bool = False,
     fig_width: int = 10,
@@ -50,36 +56,32 @@ def run(
     workdir = outdir / "work"
     workdir.mkdir(exist_ok=True)
 
-    # Run ANI calculation
-    genome_fasta_list_file = workdir / "genome_fasta_file_list.txt"
-    genome_num = write_genome_fasta_list(indir, genome_fasta_list_file)
-    if genome_num <= 1:
-        print("ERROR: Number of input genome fasta file is less than 1.")
-        exit(1)
-
     ani_result_file = workdir / f"{mode}_result"
     ani_matrix_file = Path(str(ani_result_file) + ".matrix")
-    if not ani_matrix_file.exists() or overwrite:
-        print(f"# Step1: Run {mode} between all-vs-all {genome_num} genomes.")
+    ani_matrix_tsv_file = workdir / f"{mode}_matrix.tsv"
+    if not ani_matrix_tsv_file.exists() or overwrite:
+        # Run ANI calculation
+        fasta_list_file = workdir / "genome_fasta_file_list.txt"
+        genome_num = write_genome_fasta_list(indir, fasta_list_file)
+        if genome_num <= 1:
+            logger.error("ERROR: Number of input genome fasta file is less than 1.")
+            exit(1)
+
+        logger.info(f"# Step1: Run {mode} between all-vs-all {genome_num} genomes.")
         add_bin_path()
         if mode == "fastani":
-            run_fastani(genome_fasta_list_file, ani_result_file, thread_num)
+            run_fastani(fasta_list_file, ani_result_file, thread_num)
         else:
-            run_skani(
-                genome_fasta_list_file, ani_matrix_file, thread_num, skani_c_param
-            )
+            run_skani(fasta_list_file, ani_matrix_file, thread_num, skani_c_param)
+        ani_df = parse_ani_matrix(ani_matrix_file)
+        ani_df.to_csv(ani_matrix_tsv_file, sep="\t", index=False)
     else:
-        print(f"# Step1: Previous {mode} matrix result found. Skip {mode} run.")
-
-    # Parse ANI matrix as dataframe
-    ani_matrix_tsv_file = workdir / f"{mode}_matrix.tsv"
-    ani_df = parse_ani_matrix(ani_matrix_file)
-    ani_df.to_csv(ani_matrix_tsv_file, sep="\t", index=False)
-    all_values = itertools.chain.from_iterable(ani_df.values.tolist())
-    min_ani = min(filter(lambda v: v != 0, all_values))
+        logger.info(f"# Step1: Previous {mode} matrix result found. Skip {mode} run.")
+        ani_df = pd.read_csv(ani_matrix_tsv_file, sep="\t", index_col=False)
+        ani_df = ani_df.set_index(ani_df.columns)
 
     # Hierarchical clustering ANI matrix
-    print(f"# Step2: Clustering {mode} matrix by scipy's UPGMA method.")
+    logger.info(f"# Step2: Clustering {mode} matrix by scipy's UPGMA method.")
     linkage = hc.linkage(ani_df, method="average")
 
     # Output dendrogram tree as newick format tree
@@ -93,7 +95,7 @@ def run(
         raise ValueError("Invalid hierarchy cluster detected!!")
 
     # Draw ANI clustermap
-    print("# Step3: Using clustered matrix, draw ANI clustermap by seaborn.\n")
+    logger.info("# Step3: Using clustered matrix, draw ANI clustermap by seaborn.\n")
     cmap_colors = ["lime", "yellow", "red"] if cmap_colors is None else cmap_colors
     if cmap_ranges is None:
         mycmap = LinearSegmentedColormap.from_list(
@@ -107,6 +109,7 @@ def run(
         opts = {"norm": BoundaryNorm(cmap_ranges, len(cmap_ranges) - 1)}
     mycmap.set_under("lightgrey")
 
+    min_ani = min(filter(lambda v: v != 0, np.array(ani_df).flatten()))
     g: ClusterGrid = sns.clustermap(
         data=ani_df,
         col_linkage=linkage,
@@ -125,22 +128,23 @@ def run(
         cbar_kws={
             "label": "ANI (%)",
             "orientation": "vertical",
-            "spacing": "proportional"
+            "spacing": "proportional",
             # "extend": "min",
             # "extendfrac": 0.1,
         },
         tree_kws={"linewidths": 1.5},
         **opts,  # type: ignore
     )
-    # Get clusterd ani matrix dataframe
+    # Get clustered ani matrix dataframe
     clustered_ani_df = get_clustered_matrix(ani_df, g)
     clustered_ani_matrix_tsv_file = outdir / "ANIclustermap_matrix.tsv"
     clustered_ani_df.to_csv(clustered_ani_matrix_tsv_file, sep="\t", index=False)
 
     # Output ANI clustermap figure
-    ani_clustermap_file = outdir / "ANIclustermap.png"
-    plt.savefig(ani_clustermap_file)
-    plt.savefig(ani_clustermap_file.with_suffix(".svg"))
+    ani_clustermap_png_file = outdir / "ANIclustermap.png"
+    ani_clustermap_svg_file = outdir / "ANIclustermap.svg"
+    g.savefig(ani_clustermap_png_file)
+    g.savefig(ani_clustermap_svg_file)
 
 
 def write_genome_fasta_list(
@@ -195,9 +199,8 @@ def run_fastani(
     thread_num : int
         Thread number for fastANI run
     """
-    cmd = f"fastANI --ql {genome_fasta_list_file} --rl {genome_fasta_list_file} "
-    cmd += f"-o {fastani_result_file} -t {thread_num} --matrix"
-    sp.run(cmd, shell=True)
+    cmd = f"fastANI --ql {genome_fasta_list_file} --rl {genome_fasta_list_file} -o {fastani_result_file} -t {thread_num} --matrix"  # noqa: E501
+    run_cmd(cmd)
     if fastani_result_file.exists():
         fastani_result_file.unlink()
 
@@ -221,9 +224,27 @@ def run_skani(
     c_param : int, optional
         Compression factor parameter
     """
-    cmd = f"skani triangle -l {genome_fasta_list_file} -o {result_file} "
-    cmd += f"-t {thread_num} -c {c_param}"
-    sp.run(cmd, shell=True)
+    cmd = f"skani triangle -l {genome_fasta_list_file} -o {result_file} -t {thread_num} -c {c_param}"  # noqa: E501
+    run_cmd(cmd)
+
+
+def run_cmd(cmd: str) -> None:
+    """Run command"""
+    cmd_res = sp.run(shlex.split(cmd), capture_output=True, text=True)
+    if cmd_res.returncode != 0:
+        logger.error("Failed to run command below!!")
+        logger.error(f"$ {cmd}")
+        stdout_lines = cmd_res.stdout.splitlines()
+        if len(stdout_lines) > 0:
+            logger.error("STDOUT:")
+            for line in stdout_lines:
+                logger.error(f"> {line}")
+        stderr_lines = cmd_res.stderr.splitlines()
+        if len(stderr_lines) > 0:
+            logger.error("STDERR:")
+            for line in stderr_lines:
+                logger.error(f"> {line}")
+        exit(1)
 
 
 def add_bin_path() -> None:
@@ -323,7 +344,7 @@ def get_clustered_matrix(original_df: pd.DataFrame, g: ClusterGrid) -> pd.DataFr
     """
     clustered_row_index = original_df.index[g.dendrogram_row.reordered_ind]
     clustered_col_index = original_df.columns[g.dendrogram_col.reordered_ind]
-    return original_df.loc[clustered_row_index, clustered_col_index]
+    return original_df.loc[clustered_row_index, clustered_col_index]  # type: ignore
 
 
 def get_args() -> argparse.Namespace:
@@ -335,7 +356,11 @@ def get_args() -> argparse.Namespace:
         Argument values
     """
     description = "Draw ANI(Average Nucleotide Identity) clustermap"
-    parser = argparse.ArgumentParser(description=description, add_help=False)
+    parser = argparse.ArgumentParser(
+        usage="ANIclustermap -i [Genome fasta directory] -o [output directory]",
+        description=description,
+        add_help=False,
+    )
 
     parser.add_argument(
         "-i",

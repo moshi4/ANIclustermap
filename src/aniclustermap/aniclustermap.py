@@ -42,6 +42,7 @@ def run(
     cmap_ranges: list[float] | None = None,
     cbar_pos: tuple[float, float, float, float] = (0.02, 0.8, 0.05, 0.18),
     annotation: bool = False,
+    annotation_fmt: str = ".3g",
     skani_c_param: int = 30,
 ) -> None:
     """Run ANIclustermap workflow"""
@@ -112,7 +113,7 @@ def run(
         row_linkage=linkage,
         figsize=(fig_width, fig_height),
         annot=annotation,
-        fmt=".3g",
+        fmt=annotation_fmt,
         cmap=mycmap,
         dendrogram_ratio=dendrogram_ratio,
         xticklabels=False,
@@ -437,6 +438,14 @@ def get_args() -> argparse.Namespace:
         "--annotation",
         help="Show ANI value annotation (Default: OFF)",
         action="store_true",
+    )
+    default_annotation_fmt = ".3g"
+    parser.add_argument(
+        "--annotation_fmt",
+        type=str,
+        help=f"Annotation value format (Default: '{default_annotation_fmt}')",
+        default=default_annotation_fmt,
+        metavar="",
     )
     parser.add_argument(
         "-v",

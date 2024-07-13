@@ -20,7 +20,7 @@ from seaborn.matrix import ClusterGrid
 
 from aniclustermap.logger import get_logger
 
-__version__ = "1.3.0"
+__version__ = "1.4.0"
 
 logger = get_logger("aniclustermap")
 

@@ -81,7 +81,7 @@ class AniCalcTool(ABC):
                 logger.error("STDERR:")
                 for line in stderr_lines:
                     logger.error(f"> {line}")
-                raise
+            raise
         except FileNotFoundError:
             name = self.get_tool_name()
             logger.error(f"{name} is not installed? Please check installation.")

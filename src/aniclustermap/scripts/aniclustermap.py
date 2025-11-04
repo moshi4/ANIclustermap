@@ -9,6 +9,7 @@ from typing import Annotated, Optional
 import pandas as pd
 import scipy.cluster.hierarchy as hc
 import typer
+from scipy.spatial.distance import squareform
 from typer import Option, Typer
 
 from aniclustermap import __version__, const
@@ -172,7 +173,7 @@ def cli(
 
     # Hierarchical clustering ANI matrix
     logger.info(f"Clustering {mode.value} ANI matrix by scipy UPGMA method")
-    linkage = hc.linkage(ani_matrix_df, method="average")
+    linkage = hc.linkage(squareform(100 - ani_matrix_df), method="average")
     dendrogram_newick_file = outdir / "ANIclustermap_dendrogram.nwk"
     to_newick_tree(ani_matrix_df, linkage, dendrogram_newick_file)
     logger.info("Write newick format cluster dendrogram")

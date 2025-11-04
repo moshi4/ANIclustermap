@@ -8,6 +8,7 @@ import scipy.cluster.hierarchy as hc
 import seaborn as sns
 from matplotlib.colors import BoundaryNorm
 from matplotlib.colors import LinearSegmentedColormap as LSC
+from scipy.spatial.distance import squareform
 from seaborn.matrix import ClusterGrid
 
 
@@ -59,7 +60,7 @@ def clustermap(
         ani_matrix_df = pd.read_csv(ani_matrix_df, sep="\t", encoding="utf-8")
 
     if linkage is None:
-        linkage = hc.linkage(ani_matrix_df, method="average")
+        linkage = hc.linkage(squareform(100 - ani_matrix_df), method="average")
 
     if cmap_colors is None:
         cmap_colors = ["lime", "yellow", "red"]
